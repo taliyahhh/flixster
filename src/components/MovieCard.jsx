@@ -1,16 +1,12 @@
-import '.env';
-import React from 'react';
-
 const MovieCard = () => {
+  console.log("in card");
+  return (
+    
 
-    return(
     <>
+      <h1> hi hi </h1>
     </>
-    )
-
-
-
-
-}
+  );
+};
 
 export default MovieCard;
