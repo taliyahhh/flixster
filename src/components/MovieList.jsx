@@ -3,60 +3,61 @@ import axios from "axios";
 import MovieCard from "./MovieCard";
 // import MovieCard from "./MovieCard;";
 
+// fetch in parent (MovieList) so more components can have access
 const MovieList = () => {
   const [movies, setMovies] = useState([]); // house all the data
+  const [pageNum, setPageNum] = useState(1); // stores current page #, starting @ 1
+  const [allPages, setAllPages] = useState(null); // stores amount of pages within database
+
+  function loading() {
+    setPageNum((prevNum) => prevNum + 1);
+  }
+  // console.log(movies.map((m) => m.id)); // debugging page #
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        // fetch('???')
-        // .then(res => res.json()) //formats the data so its readable
-        // .then(data => setMovies(data))
-
-        // const options = {
-        //   method: "GET",
-        //   url: "https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1",
-        //   headers: {
-        //     accept: "application/json",
-        //     Authorization: `Bearer ${import.meta.env.VITE_API_KEY}`,
-        //   },
-        // };
-
-        // axios
-        //   .request(options)
-        //   .then((res) => setMovies(res.data.results))
-        //   .catch((err) => console.error(err));
-
         const { data } = await axios.get(
-          `https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1&api_key=${
-            import.meta.env.VITE_API_KEY
-          }`
+          `https://api.themoviedb.org/3/movie/now_playing?language=en-US
+          &page=${pageNum}
+          &api_key=${import.meta.env.VITE_API_KEY}`
         );
-        setMovies(data.results);
-        console.log(data.results);
+
+        setAllPages(data.total_pages);
+        setMovies((prev) => {
+          // adds new to prev movies
+
+          const add = [...prev, ...data.results];
+
+          // filter duplicates by id, to avoid removing React.StrictMode from main.jsx
+          const uniqueMovies = add.filter(
+            (movie, index, self) =>
+              index === self.findIndex((m) => m.id === movie.id)
+          );
+
+          return uniqueMovies;
+        });
       } catch (error) {
         console.log(error);
       }
     };
 
-    fetchMovies();
-    // fetch in parent so more components can have access
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    fetchMovies(pageNum);
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
+    console.log([pageNum]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageNum]); // re render when pageNum changes (onClick)
 
   return (
     <>
       <div>
-        <input
+        {/* <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder="Search"
-        />
+        /> */}
       </div>
       <div id="cardz">
         {movies.map((m) => (
@@ -68,7 +69,13 @@ const MovieList = () => {
           />
         ))}
       </div>
-      <button onClick=""></button>
+      <button
+        id="loadMore"
+        onClick={loading}
+        disabled={allPages != null && pageNum >= allPages}
+      >
+        Load More
+      </button>
     </>
   );
 };
