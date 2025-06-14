@@ -46,9 +46,15 @@ const MovieList = () => {
 
   return (
     <>
+    
       <div>
         {movies.map((m) => (
-          <MovieCard key={m.id} />
+          <MovieCard
+            key={m.id}
+            title={m.title}
+            img={m.poster_path}
+            avg={m.vote_average}
+          />
         ))}
       </div>
     </>

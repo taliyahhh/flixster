@@ -26,3 +26,12 @@
     flex-direction: column;
   }
 } */
+#cards {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  border: 1px solid black;
+}
+.card{
+  
+}
