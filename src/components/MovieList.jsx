@@ -44,10 +44,21 @@ const MovieList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
   return (
     <>
-    
       <div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search"
+        />
+      </div>
+      <div id="cardz">
         {movies.map((m) => (
           <MovieCard
             key={m.id}
@@ -57,6 +68,7 @@ const MovieList = () => {
           />
         ))}
       </div>
+      <button onClick=""></button>
     </>
   );
 };
