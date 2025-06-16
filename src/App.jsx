@@ -6,7 +6,6 @@ import MovieList from "./components/MovieList";
 const App = () => {
   return (
     <>
-      {/* <button onClick={() => setMovies()}>SET MOVIES</button> */}
       <div className="App">
         <MovieList />
       </div>
