@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import MovieCard from "./MovieCard";
-// import MovieCard from "./MovieCard;";
+import Modal from "./Modal";
 
 // fetch in parent (MovieList) so more components can have access
 const MovieList = () => {
@@ -10,70 +10,64 @@ const MovieList = () => {
   const [allPages, setAllPages] = useState(null); // stores amount of pages within database
   const [searchQuery, setSearchQuery] = useState(""); // stores current text in search bar, then changes depending on user input
   const [message, setMessage] = useState(""); // stores message user sees from search request
-  const [isSearch, setIsSearch] = useState(false); // boolean to monitor switching state
+  const [isSearch, setIsSearch] = useState(false); // boolean to monitor switching state + clear button
+  const [prevQuery, setPrevQuery] = useState("");
+  const [sorting, setSort] = useState("Sort By"); // sort functionality
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
+  // helper functions
   function loading() {
     setPageNum((prevNum) => prevNum + 1);
+    if (allPages && pageNum >= allPages) return; // will not load past max # of pages
+    // console.log(movies.map((m) => m.id)); // debugging page #
   }
-  // console.log(movies.map((m) => m.id)); // debugging page #
 
   // API request sent
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
 
-  const searchClick = async () => {
+  // when user hits enter or search button
+  const searchClick = async (page) => {
+    setSort("Sort By");
+    setIsSearch(true);
     console.log(searchQuery); // debugging
 
-    if (!searchQuery) {
-      setMessage("Search a term.");
-      return;
+    // adjusted from below axios to above, to account for new searchQuery results so they don't append to the bottom of a previous query
+
+    if (searchQuery !== prevQuery) {
+      setMovies([1]);
+      setPageNum(1);
+      setPrevQuery(searchQuery);
     }
 
-    try {
-      const response = await axios.get(
-        `https://api.themoviedb.org/3/search/movie`,
-        {
-          params: {
-            api_key: `${import.meta.env.VITE_API_KEY}`,
-            query: searchQuery,
-          },
-        }
-      );
+    setPrevQuery(searchQuery);
 
-      const movies = response.data.results;
-
-      if (movies.length > 0) {
-        setMovies(movies);
-        setMessage("");
-        setPageNum(1); // stylistic choice: paging reset
-      } else {
-        setMovies([]);
-        setMessage("No movies found.");
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/search/movie`,
+      {
+        params: {
+          api_key: `${import.meta.env.VITE_API_KEY}`,
+          query: searchQuery,
+          page: pageNum,
+          //adults: false,
+        },
       }
-    } catch (error) {
-      console.error(error);
-      setMessage("Something went wrong. Please try again.");
-    }
-  };
+    );
 
-  // reload
-  useEffect(() => {
-    if (isSearch) return; // if search is ongoing don't reload normal page
+    const movieData = response.data.results;
 
-    const fetchMovies = async () => {
-      try {
-        const { data } = await axios.get(
-          `https://api.themoviedb.org/3/movie/now_playing?language=en-US
-          &page=${pageNum}
-          &api_key=${import.meta.env.VITE_API_KEY}`
-        );
-
-        setAllPages(data.total_pages);
-
+    if (movieData.length > 0) {
+      setMessage("");
+      setAllPages(response.data.total_pages);
+      if (page === 1) {
+        setMovies(movieData);
+      } else {
+        // search load functionality...
         setMovies((prev) => {
           // adds new to prev movies
-          const add = [...prev, ...data.results];
+          const add = [...prev, ...movieData];
 
           // filter duplicates by id, to avoid removing React.StrictMode from main.jsx
           const uniqueMovies = add.filter(
@@ -81,39 +75,126 @@ const MovieList = () => {
               index === self.findIndex((m) => m.id === movie.id)
           );
 
+          // const filter = data.results.filer(movie =>
+          //movie.title && movie.overview && movie.image_path)
           return uniqueMovies;
         });
-      } catch (error) {
-        console.log(error);
       }
-    };
+    } else {
+      setMessage("No movies found.");
+    }
+  };
 
-    fetchMovies(pageNum);
-    console.log([pageNum]); // debugging
+  const fetchNowPlayingMovies = async (page) => {
+    console.log("testing fetchNowPlayingMovies");
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageNum, isSearch]); // re render when pageNum changes or user searches (onClick)
+    const { data } = await axios.get(
+      `https://api.themoviedb.org/3/movie/now_playing?language=en-US
+        &page=${page}
+        &api_key=${import.meta.env.VITE_API_KEY}`
+    );
 
-  // mode changes
-  useEffect(() => {
-    setMovies([]);
+    setAllPages(data.total_pages);
+
+    if (page === 1) {
+      setMovies(data.results);
+    } else {
+      setMovies((prev) => {
+        // adds new to prev movies
+        const add = [...prev, ...data.results];
+
+        // filter duplicates by id, to avoid removing React.StrictMode from main.jsx
+        const uniqueMovies = add.filter(
+          (movie, index, self) =>
+            index === self.findIndex((m) => m.id === movie.id)
+        );
+
+        // const filter = data.results.filer(movie =>
+        //movie.title && movie.overview && movie.image_path)
+
+        return uniqueMovies;
+      });
+    }
+  };
+  const fetchMovies = async (page) => {
+    if (isSearch) {
+      searchClick();
+    } else {
+      fetchNowPlayingMovies(page);
+    }
+  };
+
+  // clear button
+  function clear() {
+    console.log("testing clear button");
+    setIsSearch(false);
+    setSearchQuery("");
     setMessage("");
     setPageNum(1);
-    setAllPages(null);
-    setSearchQuery("");
-  }, [isSearch]);
+    setMovies([]);
+    //fetchMovies(pageNum);
+  }
 
+  // sort logic
+  const handleSort = (event) => {
+    setSort(event.target.value);
+
+    if (event.target.value === "alphabet") {
+      // alphabetically
+      setMovies(movies.sort((a, b) => a.title.localeCompare(b.title)));
+      console.log("sorting alphabetically", movies);
+    } else if (event.target.value === "date") {
+      // date
+      setMovies(
+        movies.sort(
+          (a, b) => new Date(b.release_date) - new Date(a.release_date)
+        )
+      );
+      console.log("sorting by date", movies);
+    } else {
+      // vote avg
+      setMovies(movies.sort((a, b) => b.vote_average - a.vote_average));
+      console.log("sorting by vote", movies);
+    }
+  };
+
+  // modal closing
+  const handleClose = () => {
+    setShowModal(false);
+    setSelectedMovie(null);
+  };
+
+  // modal clicking
+  const handleCardClick = async (id) => {
+    console.log("Hi");
+    setShowModal(true);
+    setSelectedMovie(null);
+    try {
+      const { data } = await axios.get(
+        `https://api.themoviedb.org/3/movie/${id}`,
+        {
+          params: {
+            api_key: `${import.meta.env.VITE_API_KEY}`,
+          },
+        }
+      );
+      setSelectedMovie(data);
+    } catch (error) {
+      console.log(`Error fetching ${id}`, error);
+    }
+  };
+
+  // reload
+  useEffect(() => {
+    try {
+      fetchMovies(pageNum);
+      console.log([pageNum]); // debugging
+    } catch (error) {
+      console.log(error);
+    }
+  }, [pageNum, isSearch]); // re render when page # changes
   return (
     <>
-      <div id="switching">
-        <button onClick={() => setIsSearch(false)} disabled={!isSearch}>
-          Now Playing
-        </button>
-        <button onClick={() => setIsSearch(true)} disabled={isSearch}>
-          Search
-        </button>
-      </div>
-
       <div>
         <input
           type="text"
@@ -121,12 +202,22 @@ const MovieList = () => {
           onChange={handleSearchChange}
           placeholder="Search"
           onKeyDown={(enter) => {
-            if (enter.key === "Enter") searchClick(); // allows user to hit enter to search
+            if (enter.key === "Enter") searchClick();
           }}
         />
         <button onClick={searchClick}>Search</button>
+        <button id="clear" onClick={clear}>
+          Clear
+        </button>
       </div>
       {message}
+
+      <select id="sort" value={sorting} onChange={handleSort}>
+        {sorting === "Sort By" && <option>Sort By</option>}
+        <option value="alphabet">A-Z</option>
+        <option value="date">Release Date</option>
+        <option value="vote">Vote Average</option>
+      </select>
 
       <div id="cardz">
         {movies.map((m) => (
@@ -135,8 +226,13 @@ const MovieList = () => {
             title={m.title}
             img={m.poster_path}
             avg={m.vote_average}
+            onClick={() => handleCardClick(m.id)}
           />
         ))}
+      </div>
+
+      <div id="modals">
+        <Modal show={showModal} onClose={handleClose} movie={selectedMovie} />
       </div>
       <button
         id="loadMore"
