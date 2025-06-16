@@ -13,10 +13,11 @@ const MovieCard = ({ title, img, avg, onClick }) => {
   return (
     <>
       <div className="card" onClick={onClick}>
-        {/* onClick={setModal(true)} */}
         <img src={`https://image.tmdb.org/t/p/w200${img}`} alt="Movie Poster" />
-        <p>Title = {title}</p>
-        <p>Vote Average = {avg}</p>
+        <span className="cardInfo">
+          <strong>{title} </strong>
+          {avg}
+        </span>
       </div>
       {/* <Modal isOpen={modalOpen} onClose={() => setModal(false)}>
         HELLO

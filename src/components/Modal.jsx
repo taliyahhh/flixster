@@ -2,7 +2,6 @@
 import PropTypes from "prop-types";
 
 function Modal({ show, onClose, movie }) {
-  console.log("Yo yo");
   if (!show) return null;
   if (!movie) {
     return (
@@ -17,7 +16,7 @@ function Modal({ show, onClose, movie }) {
   console.log("movie is: ", movie);
   return (
     <>
-      <div onClick={onClose}>
+      <div id="modal" onClick={onClose}>
         <div onClick={(e) => e.stopPropagation()}>
           <div>
             <button onClick={onClose}>X</button>
@@ -30,6 +29,7 @@ function Modal({ show, onClose, movie }) {
           {movie.genres.map((genre) => (
             <li key={genre.id}>{genre.name}</li>
           ))}
+          {/* <span>{movie.}</span> */}
         </div>
       </div>
     </>

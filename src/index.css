@@ -1,7 +1,73 @@
-/* body {
+img {
+  aspect-ratio: 2/3;
+  /* object-fit: cover; */
+  display: block;
+}
+
+body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  font-family: "Arvo", serif;
+  background-color: #f0ece8;
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "body body"
+    "footer footer ";
+  text-align: center;
+}
+#info {
+  grid-area: "body";
+  gap: 5%;
+}
+#cardz {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 40vw;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.cardInfo strong {
+  text-align: left;
+  margin-right: auto;
+  width: 60%;
+}
+.card img {
+  flex-shrink: 0;
+}
+.cardInfo {
+  width: 90%;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+#header {
+  grid-area: "header";
+  background-color: #282c34;
+  height: 20vw;
+}
+
+#header {
+  grid-area: "footer";
+}
+
+h1,
+h2,
+h3 {
+  font-family: "DM Serif Display", serif;
+}
+
+h3 {
+  /* font-size: 18pt; */
+  width: 100%;
+  margin: 0 auto;
 }
 
 button {
@@ -14,6 +80,13 @@ button {
 }
 
 button:hover {
-  background-color: #777;
-  color: white;
-} */
+  background-color: white;
+  color: #282c34;
+  /* color: #777; */
+}
+
+@media screen and (max-width: 500px) {
+  .card {
+    width: 60vw;
+  }
+}

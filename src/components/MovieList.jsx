@@ -166,7 +166,7 @@ const MovieList = () => {
 
   // modal clicking
   const handleCardClick = async (id) => {
-    console.log("Hi");
+    // console.log("Hi");
     setShowModal(true);
     setSelectedMovie(null);
     try {
@@ -195,7 +195,8 @@ const MovieList = () => {
   }, [pageNum, isSearch]); // re render when page # changes
   return (
     <>
-      <div>
+      <div id="header">
+        <section id="logo">Flixster</section>
         <input
           type="text"
           value={searchQuery}
@@ -209,38 +210,40 @@ const MovieList = () => {
         <button id="clear" onClick={clear}>
           Clear
         </button>
+        <select id="sort" value={sorting} onChange={handleSort}>
+          {sorting === "Sort By" && <option>Sort By</option>}
+          <option value="alphabet">A-Z</option>
+          <option value="date">Release Date</option>
+          <option value="vote">Vote Average</option>
+        </select>
       </div>
       {message}
 
-      <select id="sort" value={sorting} onChange={handleSort}>
-        {sorting === "Sort By" && <option>Sort By</option>}
-        <option value="alphabet">A-Z</option>
-        <option value="date">Release Date</option>
-        <option value="vote">Vote Average</option>
-      </select>
+      <div id="info">
+        <div id="cardz">
+          {movies.map((m) => (
+            <MovieCard
+              key={m.id}
+              title={m.title}
+              img={m.poster_path}
+              avg={m.vote_average}
+              onClick={() => handleCardClick(m.id)}
+            />
+          ))}
+        </div>
 
-      <div id="cardz">
-        {movies.map((m) => (
-          <MovieCard
-            key={m.id}
-            title={m.title}
-            img={m.poster_path}
-            avg={m.vote_average}
-            onClick={() => handleCardClick(m.id)}
-          />
-        ))}
+        <div id="modals">
+          <Modal show={showModal} onClose={handleClose} movie={selectedMovie} />
+        </div>
+        <button
+          id="loadMore"
+          onClick={loading}
+          disabled={allPages != null && pageNum >= allPages}
+        >
+          Load More
+        </button>
       </div>
-
-      <div id="modals">
-        <Modal show={showModal} onClose={handleClose} movie={selectedMovie} />
-      </div>
-      <button
-        id="loadMore"
-        onClick={loading}
-        disabled={allPages != null && pageNum >= allPages}
-      >
-        Load More
-      </button>
+      <div id="footer">hi</div>
     </>
   );
 };
