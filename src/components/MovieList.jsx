@@ -15,11 +15,33 @@ const MovieList = () => {
   const [sorting, setSort] = useState("Sort By"); // sort functionality
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [textComment, setComment] = useState(false); // custom text comment
+  const [loading, setLoading] = useState(false);
+
+  // favorited and watched items are saved to their individual arrays
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem("favorites");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [watched, setWatched] = useState(() => {
+    const saved = localStorage.getItem("watched");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // when page reloads, favorites and watched stays in local storage
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
+
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched));
+  }, [watched]);
 
   // helper functions
-  function loading() {
-    setPageNum((prevNum) => prevNum + 1);
+  function loadMore() {
     if (allPages && pageNum >= allPages) return; // will not load past max # of pages
+    setPageNum((prevNum) => prevNum + 1);
     // console.log(movies.map((m) => m.id)); // debugging page #
   }
 
@@ -29,7 +51,7 @@ const MovieList = () => {
   };
 
   // when user hits enter or search button
-  const searchClick = async (page) => {
+  const searchClick = async (page = 1) => {
     setSort("Sort By");
     setIsSearch(true);
     console.log(searchQuery); // debugging
@@ -184,15 +206,46 @@ const MovieList = () => {
     }
   };
 
+  // favorites
+  function handleFavorite(id) {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    );
+  }
+
+  // watched
+  function handleWatched(id) {
+    setWatched((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    );
+  }
+
+  // with reload, create animation where boxes behind are moved from bottom -> top, then load images above
+  const boxReload = async (page) => {
+    setLoading(true);
+
+    if (isSearch) {
+      await searchClick(page);
+    } else {
+      await fetchNowPlayingMovies(page);
+    }
+    setLoading(false); // hides boxes then displays movie
+  };
+
   // reload
   useEffect(() => {
-    try {
-      fetchMovies(pageNum);
-      console.log([pageNum]); // debugging
-    } catch (error) {
-      console.log(error);
-    }
-  }, [pageNum, isSearch]); // re render when page # changes
+    const doBoxReload = async () => {
+      try {
+        await boxReload(pageNum);
+        console.log(pageNum); // debugging
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    doBoxReload();
+  }, [pageNum, isSearch]);
+
+  // re render when page # changes
   return (
     <>
       <div id="header">
@@ -201,7 +254,13 @@ const MovieList = () => {
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="Search"
+          onFocus={() => setComment(true)}
+          onBlur={() => setComment(false)}
+          placeholder={
+            textComment && searchQuery === ""
+              ? "Whatcha looking for?"
+              : "Search"
+          }
           onKeyDown={(enter) => {
             if (enter.key === "Enter") searchClick();
           }}
@@ -220,14 +279,19 @@ const MovieList = () => {
       {message}
 
       <div id="info">
-        <div id="cardz">
-          {movies.map((m) => (
+        <div id="cardz" className={loading ? "box-reload" : ""}>
+          {movies.map((movie) => (
             <MovieCard
-              key={m.id}
-              title={m.title}
-              img={m.poster_path}
-              avg={m.vote_average}
-              onClick={() => handleCardClick(m.id)}
+              key={movie.id}
+              id={movie.id}
+              title={movie.title}
+              img={movie.poster_path}
+              avg={movie.vote_average}
+              onClick={() => handleCardClick(movie.id)}
+              isFav={favorites.includes(movie.id)}
+              isWatched={watched.includes(movie.id)}
+              handleFav={handleFavorite}
+              handleWatched={handleWatched}
             />
           ))}
         </div>
@@ -237,15 +301,14 @@ const MovieList = () => {
         </div>
         <button
           id="loadMore"
-          onClick={loading}
+          onClick={loadMore}
           disabled={allPages != null && pageNum >= allPages}
         >
           Load More
         </button>
       </div>
-      <div id="footer">hi</div>
+      <div id="footer">2025 Flixster. All rights reserved</div>
     </>
   );
 };
-
 export default MovieList;
