@@ -270,7 +270,7 @@ const MovieList = () => {
     <>
       <div id="header">
         <section id="logo">
-          <img src="src/assets/Flixster.png" />
+          <img src="/src/assets/Flixster.png" />
         </section>
         <input
           type="text"
