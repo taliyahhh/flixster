@@ -6,7 +6,7 @@ import {
   faEyeSlash,
 } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as solidHeart } from "@fortawesome/free-solid-svg-icons";
-import { useEffect } from "react";
+// import { useState } from "react";
 
 const MovieCard = ({
   id,
@@ -23,6 +23,8 @@ const MovieCard = ({
   // function handleModal() {
   //   setModal(true);
   // }
+  // const fallbackImage = `/assets/no-image.jpg`;
+  // const imageUrl = movie.poster_path ? `https://image....${}` : fallbackImage;
 
   return (
     <>

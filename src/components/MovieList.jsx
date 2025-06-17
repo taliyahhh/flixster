@@ -16,7 +16,9 @@ const MovieList = () => {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [textComment, setComment] = useState(false); // custom text comment
-  const [loading, setLoading] = useState(false);
+
+  //  const fallbackImage = `/assets/no-image.jpg`;
+  // const imageUrl = selectedMovie.poster_path ? `https://image....${img}` : fallbackImage;
 
   // favorited and watched items are saved to their individual arrays
   const [favorites, setFavorites] = useState(() => {
@@ -59,7 +61,6 @@ const MovieList = () => {
     // adjusted from below axios to above, to account for new searchQuery results so they don't append to the bottom of a previous query
 
     if (searchQuery !== prevQuery) {
-      setMovies([1]);
       setPageNum(1);
       setPrevQuery(searchQuery);
     }
@@ -104,6 +105,7 @@ const MovieList = () => {
       }
     } else {
       setMessage("No movies found.");
+      setMovies([]);
     }
   };
 
@@ -138,13 +140,13 @@ const MovieList = () => {
       });
     }
   };
-  const fetchMovies = async (page) => {
-    if (isSearch) {
-      searchClick();
-    } else {
-      fetchNowPlayingMovies(page);
-    }
-  };
+  // const fetchMovies = async (page) => {
+  //   if (isSearch) {
+  //     searchClick();
+  //   } else {
+  //     fetchNowPlayingMovies(page);
+  //   }
+  // };
 
   // clear button
   function clear() {
@@ -154,7 +156,7 @@ const MovieList = () => {
     setMessage("");
     setPageNum(1);
     setMovies([]);
-    //fetchMovies(pageNum);
+    fetchNowPlayingMovies(pageNum);
   }
 
   // sort logic
@@ -221,28 +223,17 @@ const MovieList = () => {
   }
 
   // with reload, create animation where boxes behind are moved from bottom -> top, then load images above
-  const boxReload = async (page) => {
-    setLoading(true);
-
-    if (isSearch) {
-      await searchClick(page);
-    } else {
-      await fetchNowPlayingMovies(page);
-    }
-    setLoading(false); // hides boxes then displays movie
-  };
 
   // reload
   useEffect(() => {
-    const doBoxReload = async () => {
-      try {
-        await boxReload(pageNum);
-        console.log(pageNum); // debugging
-      } catch (error) {
-        console.log(error);
+    try {
+      if (!isSearch) {
+        fetchNowPlayingMovies(pageNum);
       }
-    };
-    doBoxReload();
+      console.log(pageNum); // debugging
+    } catch (error) {
+      console.log(error);
+    }
   }, [pageNum, isSearch]);
 
   // re render when page # changes
@@ -279,7 +270,7 @@ const MovieList = () => {
       {message}
 
       <div id="info">
-        <div id="cardz" className={loading ? "box-reload" : ""}>
+        <div id="cardz">
           {movies.map((movie) => (
             <MovieCard
               key={movie.id}
@@ -295,10 +286,11 @@ const MovieList = () => {
             />
           ))}
         </div>
-
+        {/* {showModal && ( */}
         <div id="modals">
           <Modal show={showModal} onClose={handleClose} movie={selectedMovie} />
         </div>
+        {/* )} */}
         <button
           id="loadMore"
           onClick={loadMore}

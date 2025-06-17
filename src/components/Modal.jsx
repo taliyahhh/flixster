@@ -16,20 +16,46 @@ function Modal({ show, onClose, movie }) {
   console.log("movie is: ", movie);
   return (
     <>
-      <div id="modal" onClick={onClose}>
-        <div onClick={(e) => e.stopPropagation()}>
-          <div>
-            <button onClick={onClose}>X</button>
+      <div id="modal-overlay" onClick={onClose}>
+        <div id="modal" onClick={onClose}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <div>
+              <button onClick={onClose}>X</button>
+            </div>
+            <h1>{movie.title}</h1>
+            <hr className="belowTitle" />
+            <div className="modal-content">
+              <div className="modal-text">
+                <br />
+                <span>
+                  <strong>Release Date: </strong>
+                  {movie.release_date}
+                </span>
+                <br />
+                <span>{movie.runtime} minutes</span>
+                <br />
+                <hr className="modalLine" />
+                <p className="desc">
+                  <strong>Description: </strong>
+                  {movie.overview}
+                </p>
+                <hr className="modalLine" />
+
+                <p className="genres">
+                  <strong>Genres</strong>
+                  {movie.genres.map((genre) => (
+                    <li key={genre.id}>{genre.name}</li>
+                  ))}
+                </p>
+              </div>
+              <img
+                className="modalImg"
+                src={`https://image.tmdb.org/t/p/w200${movie.backdrop_path}`}
+                alt="Movie Background Poster"
+              />
+            </div>
+            {/* <span>{movie.}</span> */}
           </div>
-          <h1> yo</h1>
-          <h1>{movie.id}</h1>
-          <span>{movie.background_path}</span>
-          <span>{movie.release_date}</span>
-          <span>{movie.overview}</span>
-          {movie.genres.map((genre) => (
-            <li key={genre.id}>{genre.name}</li>
-          ))}
-          {/* <span>{movie.}</span> */}
         </div>
       </div>
     </>
