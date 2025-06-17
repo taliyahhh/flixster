@@ -16,6 +16,7 @@ const MovieList = () => {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [textComment, setComment] = useState(false); // custom text comment
+  const [videoKey, setVideoKey] = useState(null); // trailer
 
   //  const fallbackImage = `/assets/no-image.jpg`;
   // const imageUrl = selectedMovie.poster_path ? `https://image....${img}` : fallbackImage;
@@ -186,6 +187,7 @@ const MovieList = () => {
   const handleClose = () => {
     setShowModal(false);
     setSelectedMovie(null);
+    setVideoKey(null);
   };
 
   // modal clicking
@@ -203,6 +205,24 @@ const MovieList = () => {
         }
       );
       setSelectedMovie(data);
+
+      // trailer addition to modal
+      const { data: videoKey } = await axios.get(
+        `https://api.themoviedb.org/3/movie/${id}/videos`,
+        {
+          params: {
+            api_key: `${import.meta.env.VITE_API_KEY}`,
+          },
+        }
+      );
+      const trailer = videoKey.results.find(
+        (vid) => vid.type === "Trailer" && vid.site === "YouTube"
+      );
+      if (trailer) {
+        setVideoKey(trailer.key);
+      } else {
+        setVideoKey(null);
+      }
     } catch (error) {
       console.log(`Error fetching ${id}`, error);
     }
@@ -240,7 +260,9 @@ const MovieList = () => {
   return (
     <>
       <div id="header">
-        <section id="logo">Flixster</section>
+        <section id="logo">
+          <img src="src/assets/Flixster.png" />
+        </section>
         <input
           type="text"
           value={searchQuery}
@@ -288,7 +310,12 @@ const MovieList = () => {
         </div>
         {/* {showModal && ( */}
         <div id="modals">
-          <Modal show={showModal} onClose={handleClose} movie={selectedMovie} />
+          <Modal
+            show={showModal}
+            onClose={handleClose}
+            movie={selectedMovie}
+            videoKey={videoKey}
+          />
         </div>
         {/* )} */}
         <button

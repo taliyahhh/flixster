@@ -1,7 +1,7 @@
 // import React from "react";
 import PropTypes from "prop-types";
 
-function Modal({ show, onClose, movie }) {
+function Modal({ show, onClose, movie, videoKey }) {
   if (!show) return null;
   if (!movie) {
     return (
@@ -14,6 +14,7 @@ function Modal({ show, onClose, movie }) {
   }
 
   console.log("movie is: ", movie);
+
   return (
     <>
       <div id="modal-overlay" onClick={onClose}>
@@ -54,8 +55,18 @@ function Modal({ show, onClose, movie }) {
                 alt="Movie Background Poster"
               />
             </div>
-            {/* <span>{movie.}</span> */}
           </div>
+          {videoKey ? (
+            <iframe
+              className="trailer"
+              src={`https://www.youtube.com/embed/${videoKey}`}
+              alt="Movie Trailer"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          ) : (
+            <p>This movie has no trailer.</p>
+          )}
         </div>
       </div>
     </>
@@ -67,6 +78,7 @@ Modal.propTypes = {
   movie: PropTypes.any.isRequired,
   show: PropTypes.any.isRequired,
   onClose: PropTypes.any.isRequired,
+  videoKey: PropTypes.any.isRequired,
 };
 
 export default Modal;
