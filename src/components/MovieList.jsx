@@ -23,15 +23,24 @@ const MovieList = () => {
 
   // favorited and watched items are saved to their individual arrays
   const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem("favorites");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem("favorites");
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   });
 
   const [watched, setWatched] = useState(() => {
-    const saved = localStorage.getItem("watched");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem("watched");
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   });
-
   // when page reloads, favorites and watched stays in local storage
   useEffect(() => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
@@ -301,8 +310,8 @@ const MovieList = () => {
               img={movie.poster_path}
               avg={movie.vote_average}
               onClick={() => handleCardClick(movie.id)}
-              isFav={favorites.includes(movie.id)}
-              isWatched={watched.includes(movie.id)}
+              isFav={(favorites ?? []).includes(movie.id)}
+              isWatched={(watched ?? []).includes(movie.id)}
               handleFav={handleFavorite}
               handleWatched={handleWatched}
             />

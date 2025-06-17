@@ -102,6 +102,7 @@ button:hover {
   animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   /* border: 1px solid rgba(68, 73, 83, 0.499); */
   box-shadow: 0 0 5px #1f2a42;
+  background-color: white;
 }
 
 .cardInfo strong {

@@ -37,7 +37,7 @@ const MovieCard = ({
               e.stopPropagation();
               handleFav(id);
             }}
-            // className={`heart ${isFav ? "solid" : "regular"}`}
+            className={`heart ${isFav ? "solid" : "regular"}`}
             style={{ color: isFav ? "red" : "black" }}
           />
           <FontAwesomeIcon

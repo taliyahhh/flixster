@@ -78,7 +78,7 @@ Modal.propTypes = {
   movie: PropTypes.any.isRequired,
   show: PropTypes.any.isRequired,
   onClose: PropTypes.any.isRequired,
-  videoKey: PropTypes.any.isRequired,
+  videoKey: PropTypes.any,
 };
 
 export default Modal;
