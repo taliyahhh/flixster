@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import MovieCard from "./MovieCard";
 import Modal from "./Modal";
+// import FlixsterLogo from ".../assets/Flixster.png";
 
 // fetch in parent (MovieList) so more components can have access
 const MovieList = () => {
@@ -270,7 +271,10 @@ const MovieList = () => {
     <>
       <div id="header">
         <section id="logo">
-          <img src="/src/assets/Flixster.png" />
+          <img
+            src={new URL("../assets/Flixster.png", import.meta.url).href}
+            alt="Flixster Logo"
+          />
         </section>
         <input
           type="text"
